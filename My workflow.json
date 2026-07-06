@@ -1,0 +1,448 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "15axhfT9nvTKPJNJn5Dtc7wj-WPz0puKn",
+          "mode": "list",
+          "cachedResultName": "Purchase Agreements",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/15axhfT9nvTKPJNJn5Dtc7wj-WPz0puKn"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ccb89550-6b3a-418c-bb27-d2a788380365",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VmGZ6ZuhDvwKEkjv",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id}} ",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "48b06244-4453-4556-b5e5-baa370f63a0e",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VmGZ6ZuhDvwKEkjv",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "3ad2476c-a2e3-4048-bbd2-c2697f230c24",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an expert AI real estate document extraction assistant.\n\nExtract the following fields from the document below.\n\n- Buyer Name\n- Seller Name\n- Property Address\n- Purchase Price\n- Closing Date\n- Agent Name\n\nReturn ONLY this JSON format:\n\n{\n  \"buyer_name\": \"\",\n  \"seller_name\": \"\",\n  \"property_address\": \"\",\n  \"purchase_price\": \"\",\n  \"closing_date\": \"\",\n  \"agent_name\": \"\"\n}\n\nDocument:\n\n{{ $('Extract from File').item.json.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "ce72acb1-079a-401b-b330-10a2ee89fdd5",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Mx00N_zG6DmCTjupdx65LmQffTdcLsrUXMeP4cJGt9g",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Mx00N_zG6DmCTjupdx65LmQffTdcLsrUXMeP4cJGt9g/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "buyer_name": "={{ JSON.parse($('Message a model').item.json.output[0].content[0].text).buyer_name }}",
+            "seller_name": "={{ JSON.parse($('Message a model').item.json.output[0].content[0].text).seller_name }}",
+            "property_address": "={{ JSON.parse($('Message a model').item.json.output[0].content[0].text).property_address }}",
+            "purchase_price": "={{ JSON.parse($('Message a model').item.json.output[0].content[0].text).purchase_price }}",
+            "closing_date": "={{ JSON.parse($('Message a model').item.json.output[0].content[0].text).closing_date }}",
+            "agent_name": "={{ JSON.parse($('Message a model').item.json.output[0].content[0].text).agent_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "buyer_name",
+              "displayName": "buyer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "seller_name",
+              "displayName": "seller_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "property_address",
+              "displayName": "property_address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "purchase_price",
+              "displayName": "purchase_price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "closing_date",
+              "displayName": "closing_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "agent_name",
+              "displayName": "agent_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1264,
+        -32
+      ],
+      "id": "56eac890-9281-46f7-8463-ac58f08f4ba8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5rm1NlW16aTayFxZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0296ed0f-114f-49d3-8b11-b1ee873f70d7",
+              "leftValue": "={{ $json.buyer_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        32
+      ],
+      "id": "89edad21-b32a-4ff4-836a-69862fa01d7f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive Trigger').item.json.id }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1OyL8oQ96x92MxnswQEZoUg383yauxfC-",
+          "mode": "list",
+          "cachedResultName": "Failed PDFs",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1OyL8oQ96x92MxnswQEZoUg383yauxfC-"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1328,
+        224
+      ],
+      "id": "0be11928-041a-4a0a-bcdc-ec5855364769",
+      "name": "Move file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VmGZ6ZuhDvwKEkjv",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive Trigger').item.json.id }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1VPsWhmUduRYZAnGL5gfqiJObJmGu8xPv",
+          "mode": "list",
+          "cachedResultName": "Processed PDFs",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1VPsWhmUduRYZAnGL5gfqiJObJmGu8xPv"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1408,
+        16
+      ],
+      "id": "3d60b763-20b8-4fc4-b690-f458ef8c0470",
+      "name": "Move file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VmGZ6ZuhDvwKEkjv",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "kushallkushal954@gmail.com",
+        "subject": "Property Agreement Processed Successfully",
+        "emailType": "text",
+        "message": "=A new property document has been processed successfully.  Buyer: {{$json.buyer_name}}  Seller: {{$json.seller_name}}  Property Address: {{$json.property_address}}  Purchase Price: {{$json.purchase_price}}  Closing Date: {{$json.closing_date}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        16
+      ],
+      "id": "1c780576-444a-484a-be17-503514df06e6",
+      "name": "Send a message",
+      "webhookId": "5ee5dc49-ddaa-48a7-8baf-ac002fde1ccb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uMyUhn8pWDlwLZhC",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Move file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Move file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move file": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "bb2add5f-d8d4-4ea1-b24a-bceaa2917e3b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a85cdacbb3065b93f74a115685196a7da17f754bcf9dc4d3f2ec432888407613"
+  },
+  "nodeGroups": [],
+  "id": "XnwIbtGIn07RNXa0",
+  "tags": []
+}
